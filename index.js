@@ -6,11 +6,11 @@ var cake = {
   bakeTime: "45 minutes",
   customer: "Tommy",
   decorate: function(updateFunction) {
-    var status = "Decorating with " + this.topping + ". Ready to eat soon!"
-    updateFunction(status)
-    setTimeout(function() {
-      updateFunction(serve.apply(this, "Happy Eating!", this.customer))
-    }, 2000)
+    var status = "Decorating with " + this.topping + ". Ready to eat soon!";
+    updateFunction(status);
+    setTimeout(() => {
+      updateFunction(serve.call(this, "Happy Eating!", this.customer))
+    }, 3000)
   }
 }
 
@@ -20,46 +20,64 @@ var pie = {
   topping: "streusel",
   bakeTemp: "350 degrees",
   bakeTime: "75 minutes",
-  customer: "Tammy"
+  customer: "Tammy",
 }
 
 function makeCake() {
-  var updateCakeStatus;
-  mix(updateCakeStatus)
+  var upcake = updateStatus.bind(this);
+  function updateCakeStatus(status) {upcake(status, "cake")}
+  mix.call(this, updateCakeStatus);
 }
 
 function makePie() {
-  var updatePieStatus;
-  mix(updatePieStatus)
+
+  var uppie = updateStatus.bind(this);
+  function updatePieStatus(status) {uppie(status, "pie")}
+  pie.decorate = cake.decorate.bind(pie)
+  mix.call(this, updatePieStatus)
 }
 
-function updateStatus(statusText) {
-  this.getElementsByClassName("status")[0].innerText = statusText
+
+function updateStatus(statusText, item) {
+  document.getElementById(item).getElementsByClassName("status")[0].innerText = statusText;
 }
+
 
 function bake(updateFunction) {
+  console.log("bake: " + this.name);
   var status = "Baking at " + this.bakeTemp + " for " + this.bakeTime
-  setTimeout(function() {
-    cool(updateFunction)
+  setTimeout(() => {
+    cool.call(this, updateFunction)
   }, 2000)
+  updateFunction(status)
 }
 
 function mix(updateFunction) {
+  // console.log("mix: " + this.name);
   var status = "Mixing " + this.ingredients.join(", ")
-  setTimeout(function() {
-    bake(updateFunction)
+  setTimeout(() => {
+    bake.call(this, updateFunction)
   }, 2000)
   updateFunction(status)
 }
 
 function cool(updateFunction) {
+  // console.log("cool: " + this.name);
   var status = "It has to cool! Hands off!"
-  setTimeout(function() {
+  setTimeout(() => {
     this.decorate(updateFunction)
   }, 2000)
+  updateFunction(status);
 }
 
 function makeDessert() {
+  if (this.innerText == "Make Cake") {
+    makeCake.call(cake);
+  } else if (this.innerText == "Make Pie") {
+    makePie.call(pie);
+  } else {
+
+  }
   //add code here to decide which make... function to call
   //based on which link was clicked
 }
